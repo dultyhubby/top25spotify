@@ -59,6 +59,7 @@ def callback():
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
+        
 
         return redirect('/albums')
 
@@ -147,11 +148,11 @@ def generate_collage():
 def generate_collage_now():
     # Inside the /generate_collage_now route
     top_albums = session.get('top_albums', [])
-    album_covers = [Image.open(BytesIO(requests.get(album[1]).content)) for album in top_albums]
+    album_covers = [Image.open(BytesIO(requests.get(album[0]).content)) for album in top_albums]
 
     # Calculate collage dimensions based on a grid layout
-    collage_width = 500
-    collage_height = 500
+    collage_width = 1000
+    collage_height = 1000
     num_cols = 5
     num_rows = 5
     thumbnail_size = (collage_width // num_cols, collage_height // num_rows)
@@ -161,8 +162,7 @@ def generate_collage_now():
     for i, album_cover in enumerate(album_covers):
         col = i % num_cols
         row = i // num_cols
-        resized_cover = album_cover.resize(thumbnail_size, Image.LANCZOS)
-        collage.paste(resized_cover, (col * thumbnail_size[0], row * thumbnail_size[1]))
+        collage.paste(album_cover, (col * thumbnail_size[0], row * thumbnail_size[1]))
 
     filename = f"collage_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
     
@@ -179,5 +179,5 @@ def generate_collage_now():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000)
 
